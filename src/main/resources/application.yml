@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: social-application
+server:
+  port: 8081

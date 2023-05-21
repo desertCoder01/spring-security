@@ -1,47 +1,45 @@
 package com.example.demo.controller;
 
-import com.example.demo.security.LoginResponse;
-import com.example.demo.security.PrincipalUserDetails;
-import com.example.demo.security.TokenProvider;
+
+import com.example.demo.model.request.LoginRequest;
+import com.example.demo.model.request.SignupRequest;
+import com.example.demo.model.response.ApiResponse;
+import com.example.demo.model.response.GenericApiResponse;
+import com.example.demo.model.response.LoginResponse;
+import com.example.demo.model.response.SignupResponse;
+import com.example.demo.service.IAuthService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Arrays;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AuthController {
 
-    @Autowired
-    private TokenProvider tokenProvider;
+    private final IAuthService authService;
 
-    @PostMapping("/login/admin")
-    ResponseEntity<LoginResponse> loginAdmin(){
-        PrincipalUserDetails principalUserDetails = new PrincipalUserDetails(
-                "pankaj.kumar@gmail.com",
-                "ADMIN",
-                "Pankaj@123",
-                Arrays.asList("READ","WRITE","DELETE")
-        );
-        String accessToken = tokenProvider.createAccessToken(principalUserDetails);
-        String refreshToken = tokenProvider.createRefreshToken(principalUserDetails);
-        return ResponseEntity.ok(new LoginResponse(accessToken,refreshToken));
+    @PostMapping("/signup")
+    ResponseEntity<GenericApiResponse<SignupResponse>> signup(@RequestBody SignupRequest request){
+        GenericApiResponse<SignupResponse> response = authService.signup(request);
+        response.setUri("/auth/signup");
+        return ResponseEntity.status(response.getHttpStatusCode()).body(response);
     }
 
-    @PostMapping("/login/customer")
-    ResponseEntity<LoginResponse> loginCustomer(){
-        PrincipalUserDetails principalUserDetails = new PrincipalUserDetails(
-                "vikash.kumar@gmail.com",
-                "CUSTOMER",
-                "Vikash@123",
-                Arrays.asList("READ")
-        );
-        String accessToken = tokenProvider.createAccessToken(principalUserDetails);
-        String refreshToken = tokenProvider.createRefreshToken(principalUserDetails);
-        return ResponseEntity.ok(new LoginResponse(accessToken,refreshToken));
+    @GetMapping("/confirm-account")
+    ResponseEntity<GenericApiResponse<ApiResponse>> confirmAccount(@RequestParam("id") String id,
+                                                                   @RequestParam("field") long field){
+        GenericApiResponse<ApiResponse> response = authService.confirmAccount(id,field);
+        response.setUri("/auth/confirm-account");
+        return ResponseEntity.status(response.getHttpStatusCode()).body(response);
     }
+
+    @PostMapping("/login")
+    ResponseEntity<GenericApiResponse<LoginResponse>> login(@RequestBody LoginRequest request){
+        GenericApiResponse<LoginResponse> response = authService.login(request);
+        response.setUri("/auth/login");
+        return ResponseEntity.status(response.getHttpStatusCode()).body(response);
+    }
+
 }
-

@@ -19,7 +19,7 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
 //        if (authentication == null || !authentication.isAuthenticated() || !(permission instanceof String)) {
 //            return false;
 //        }
-        UserInfo userInfo = (UserInfo)authentication.getPrincipal();
+        SessionUserDetails userInfo = (SessionUserDetails) authentication.getPrincipal();
         List<String> permissions = new ArrayList<>();
         for (GrantedAuthority authority : userInfo.getAuthorities()) {
             permissions.add(authority.getAuthority());

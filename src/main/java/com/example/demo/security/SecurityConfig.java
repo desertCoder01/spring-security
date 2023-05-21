@@ -23,7 +23,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig extends GlobalMethodSecurityConfiguration {
 
     @Autowired
-    private SecurityUserService userService;
+    private AuthenticationService authenticationService;
 
     @Autowired
     private CustomAuthFilter customAuthFilter;
@@ -34,16 +34,14 @@ public class SecurityConfig extends GlobalMethodSecurityConfiguration {
     @Autowired
     private CustomPermissionEvaluator permissionEvaluator;
 
+    @Autowired
+    private CustomPasswordEncoder passwordEncoder;
+
     @Override
     protected MethodSecurityExpressionHandler createExpressionHandler() {
         DefaultMethodSecurityExpressionHandler handler = new DefaultMethodSecurityExpressionHandler();
         handler.setPermissionEvaluator(permissionEvaluator);
         return handler;
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
     }
 
     @Bean
@@ -68,13 +66,13 @@ public class SecurityConfig extends GlobalMethodSecurityConfiguration {
     public AuthenticationManager authManager(HttpSecurity http)
             throws Exception {
         return http.getSharedObject(AuthenticationManagerBuilder.class)
-                .userDetailsService(userService)
-                .passwordEncoder(passwordEncoder())
+                .userDetailsService(authenticationService)
+                .passwordEncoder(passwordEncoder)
                 .and()
                 .build();
     }
 
     private static final String [] AUTH_WHITELIST ={
-            "/auth/login/**"
+            "/auth/**"
     };
 }

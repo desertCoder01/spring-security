@@ -13,21 +13,21 @@ public class TokenProvider {
 
     private static final String tokenSecret = "AdityaCodes@321";
 
-    public String createAccessToken(PrincipalUserDetails userDetails) {
+    public String createAccessToken(SessionUserDetails userDetails) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + 10*24*60*60*1000);
         return JWT.create()
-                .withSubject(userDetails.getUsername())
+                .withSubject(userDetails.getUserId())
                 .withIssuedAt(now)
                 .withExpiresAt(expiryDate)
                 .sign(Algorithm.HMAC256(tokenSecret.getBytes()));
     }
 
-    public String createRefreshToken(PrincipalUserDetails userDetails) {
+    public String createRefreshToken(SessionUserDetails userDetails) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + 365*24*60*60*1000);
         return JWT.create()
-                .withSubject(userDetails.getUsername())
+                .withSubject(userDetails.getUserId())
                 .withIssuedAt(now)
                 .withExpiresAt(expiryDate)
                 .sign(Algorithm.HMAC256(tokenSecret.getBytes()));

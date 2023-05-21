@@ -10,6 +10,7 @@ import com.example.demo.model.repository.RoleRepository;
 import com.example.demo.model.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,28 +23,27 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public class SecurityUserService implements UserDetailsService {
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+public class AuthenticationService implements UserDetailsService {
 
+    private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
-    private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
-        log.info("Received Authentication request for id :"+userId);
-        Optional<UserInfo> optionalUserInfo = userRepository.findById(userId);
-        if(ObjectUtils.isEmpty(optionalUserInfo)){
-            throw new UsernameNotFoundException("User not found for :"+userId);
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        log.info("Received Authentication request for email :"+email);
+        UserInfo userInfo = userRepository.findByEmail(email);
+        if(ObjectUtils.isEmpty(userInfo)){
+            throw new UsernameNotFoundException("User not found for :"+email);
         }
-        UserInfo userInfo = optionalUserInfo.get();
         if(!userInfo.isActive()){
-            throw new InvalidRequestException("Account not activated for :"+userId);
+            throw new InvalidRequestException("Account not activated for :"+email);
         }
         Optional<RoleInfo> optionalRole = roleRepository.findById(userInfo.getRole());
         List<PermissionInfo> allPermissions = permissionRepository.findAllById(userInfo.getPermissions());
         return SessionUserDetails.builder()
-                .username(userInfo.getEmail())
+                .username(email)
                 .role(optionalRole.get().getName())
                 .permissions(allPermissions==null ? null : allPermissions.stream()
                         .map(permit -> permit.getName()).collect(Collectors.toList()))

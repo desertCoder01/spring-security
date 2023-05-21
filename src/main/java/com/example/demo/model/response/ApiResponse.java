@@ -1,4 +1,4 @@
-package com.example.demo.security;
+package com.example.demo.model.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
